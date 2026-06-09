@@ -2,6 +2,7 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch
+from model import NumBrush
 
 transform = transforms.Compose([
     transforms.ToTensor(),
@@ -35,29 +36,6 @@ else:
 
 print(f'Using device: {device}')
 
-class NumBrush(nn.Module):
-    def __init__(self):
-        super(NumBrush, self).__init__()
-        
-        self.features = nn.Sequential(
-            nn.Conv2d(1, 32, 3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(32, 64, 3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2)
-        )
-        
-        self.classifier = nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(64 * 7 * 7, 128),
-            nn.ReLU(),
-            nn.Linear(128, 10)
-        )
-        
-    def forward(self, x):
-        return self.classifier(self.features(x))
-    
 model = NumBrush()
 model.to(device)
 
