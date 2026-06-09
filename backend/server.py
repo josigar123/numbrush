@@ -1,5 +1,4 @@
 from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import JSONResponse
 from PIL import Image
 import torch
 import torchvision.transforms as transforms
@@ -43,4 +42,4 @@ async def predict(file: UploadFile = File(...)) -> PredictionResponse:
         predicted = torch.argmax(logits, dim=1).item()
         confidence = torch.softmax(logits, dim=1).max().item()
     
-    return JSONResponse(content=PredictionResponse(digit=predicted, confidence=round(confidence, 4)))
+    return PredictionResponse(digit=predicted, confidence=round(confidence, 4))
