@@ -4,9 +4,10 @@ struct CanvasView: View {
     @State private var lines: [Line] = []
     @State private var currentLine: Line = Line()
     var onSubmit: (UIImage) -> Void
+    var onClear: () -> Void
 
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
             Canvas { context, size in
                 for line in lines + [currentLine] {
                     var path = Path()
@@ -14,12 +15,18 @@ struct CanvasView: View {
                     context.stroke(
                         path,
                         with: .color(.white),
-                        style: StrokeStyle(lineWidth: 20, lineCap: .round, lineJoin: .round)
+                        style: StrokeStyle(lineWidth: 22, lineCap: .round, lineJoin: .round)
                     )
                 }
             }
-            .background(Color.black)
-            .frame(width: 280, height: 280)
+            .background(Color(white: 0.08))
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .frame(width: 300, height: 300)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
+            )
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
@@ -31,21 +38,35 @@ struct CanvasView: View {
                     }
             )
 
-            HStack {
-                Button("Clear") {
+            HStack(spacing: 12) {
+                Button(action: {
                     lines = []
+                    onClear()
+                }) {
+                    Text("Clear")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.7))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.white.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
-                .padding()
 
-                Button("Predict") {
-                    onSubmit(snapshot())
+                Button(action: { onSubmit(snapshot()) }) {
+                    Text("Predict")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
-                .padding()
             }
+            .frame(width: 300)
         }
     }
 
-    private func snapshot() -> UIImage {
+    func snapshot() -> UIImage {
         let renderer = ImageRenderer(
             content: Canvas { context, size in
                 context.fill(
@@ -58,11 +79,11 @@ struct CanvasView: View {
                     context.stroke(
                         path,
                         with: .color(.white),
-                        style: StrokeStyle(lineWidth: 20, lineCap: .round, lineJoin: .round)
+                        style: StrokeStyle(lineWidth: 22, lineCap: .round, lineJoin: .round)
                     )
                 }
             }
-            .frame(width: 280, height: 280)
+            .frame(width: 300, height: 300)
         )
         return renderer.uiImage ?? UIImage()
     }
