@@ -15,7 +15,7 @@ struct CanvasView: View {
                     context.stroke(
                         path,
                         with: .color(.white),
-                        style: StrokeStyle(lineWidth: 22, lineCap: .round, lineJoin: .round)
+                        style: StrokeStyle(lineWidth: 16, lineCap: .round, lineJoin: .round)
                     )
                 }
             }
@@ -79,7 +79,7 @@ struct CanvasView: View {
                     context.stroke(
                         path,
                         with: .color(.white),
-                        style: StrokeStyle(lineWidth: 22, lineCap: .round, lineJoin: .round)
+                        style: StrokeStyle(lineWidth: 16, lineCap: .round, lineJoin: .round)
                     )
                 }
             }

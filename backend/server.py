@@ -29,7 +29,6 @@ model.to(device)
 model.eval()
 
 transform = transforms.Compose([
-    transforms.Resize((28, 28)),
     transforms.ToTensor(),
     transforms.Normalize((0.1307,), (0.3081,))
 ])
@@ -43,19 +42,20 @@ def crop_and_center(image: Image.Image) -> Image.Image:
         return image
     rmin, rmax = np.where(rows)[0][[0, -1]]
     cmin, cmax = np.where(cols)[0][[0, -1]]
-    pad = max((rmax - rmin), (cmax - cmin)) // 4
-    rmin = max(0, rmin - pad)
-    rmax = min(arr.shape[0], rmax + pad)
-    cmin = max(0, cmin - pad)
-    cmax = min(arr.shape[1], cmax + pad)
     cropped = arr[rmin:rmax+1, cmin:cmax+1]
     h, w = cropped.shape
-    size = max(h, w)
-    square = np.zeros((size, size), dtype=np.uint8)
-    y_off = (size - h) // 2
-    x_off = (size - w) // 2
-    square[y_off:y_off+h, x_off:x_off+w] = cropped
-    return Image.fromarray(square)
+
+    # fit digit into 20x20 (MNIST style) then pad to 28x28
+    scale = 20 / max(h, w)
+    new_h, new_w = max(1, int(h * scale)), max(1, int(w * scale))
+    resized = np.array(
+        Image.fromarray(cropped).resize((new_w, new_h), Image.LANCZOS)
+    )
+    canvas = np.zeros((28, 28), dtype=np.uint8)
+    y_off = (28 - new_h) // 2
+    x_off = (28 - new_w) // 2
+    canvas[y_off:y_off+new_h, x_off:x_off+new_w] = resized
+    return Image.fromarray(canvas)
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)) -> PredictionResponse:
